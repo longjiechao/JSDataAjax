@@ -2,6 +2,7 @@
 
 consultaDades();
 var categorias = {};
+var info = {};
 
 
 function consultaDades() {
@@ -12,8 +13,12 @@ function consultaDades() {
 }
 
 function allFunctions(data){
-    console.log(data.categories);
+    console.log(data);
     setCategories(data.categories);
+    console.log(categorias);
+    createInfo();
+    setInfo(data.data);
+    console.log(info);
     crearTable();
 }
 
@@ -32,7 +37,24 @@ function setCategories(categories){
             }
         }
     }
-    console.log(categorias);
+}
+
+function createInfo(){
+    for(year = 0; year < categorias.Años.length; year++){
+        info[categorias.Años[year]] = {};
+        for(isla in categorias.Islas){
+            info[categorias.Años[year]][isla] = {};
+            for(sexo in categorias.Sexos){
+                info[categorias.Años[year]][isla][sexo] = 0;
+            }
+        }
+    }
+}
+
+function setInfo(data){
+    for(i = 0; i < data.length; i++){
+        info[data[i].dimCodes[0]][data[i].dimCodes[1]][data[i].dimCodes[2]] = data[i].Valor;
+    }
 }
 
 function crearTable(){
@@ -40,7 +62,7 @@ function crearTable(){
     var table = document.createElement("table");
     
     crearTableTitle(table);
-
+    createTableContent(table);
     
     $(table).attr("border", 2);
     $(mainDiv).append(table);
@@ -54,10 +76,13 @@ function crearTableTitle(table){
     tr = document.createElement("tr");
     for(i in categorias){
         th = document.createElement("th");
-        text = document.createTextNode(i);
-        if(i == "Sexos"){
-            $(th).attr("colspan", 3);
+        if(i != "Sexos"){
+            $(th).attr("rowspan", 2);
+        }else{
+             $(th).attr("colspan", 3);
         }
+        
+        text = document.createTextNode(i);
         $(th).append(text);
         $(tr).append(th);
     }
@@ -65,11 +90,6 @@ function crearTableTitle(table){
     
     //segunda tr
     tr = document.createElement("tr");
-    
-    //cuadro vacio
-    th = document.createElement("th");
-    $(th).attr("colspan", 2);
-    $(tr).append(th);
     
     for(i in categorias["Sexos"]){
         th = document.createElement("th");
@@ -80,4 +100,57 @@ function crearTableTitle(table){
     $(div).append(tr);
     
     $(table).append(div);
+}
+
+function createTableContent(table){
+    for(i = 0; i<categorias["Años"].length; i++){
+        var div = document.createElement("div");
+        var tr, th, td, text;
+
+        //el resto
+        for(j in categorias["Islas"]){
+            if(Object.keys(categorias["Islas"]).indexOf(j) == 0){
+                
+                //años
+                tr = document.createElement("tr");
+                th = document.createElement("th");
+                $(th).attr("rowspan", Object.keys(categorias["Islas"]).length);
+                text = document.createTextNode(categorias["Años"][i]);
+                $(th).append(text);
+                $(tr).append(th);
+                
+                //crear poner el primer isla
+                td = document.createElement("td");
+                text = document.createTextNode(categorias["Islas"][j]);
+                $(td).append(text);
+                $(tr).append(td);
+                
+                for(s in categorias.Sexos){
+                    td = document.createElement("td");
+                    console.log(info[categorias["Años"][i]]);
+                    text = document.createTextNode(info[categorias["Años"][i]][j][s]);
+                    $(td).append(text);
+                    $(tr).append(td);
+                }
+                
+                $(div).append(tr);
+            }else{
+                //islas
+                tr = document.createElement("tr");
+                td = document.createElement("td");
+                text = document.createTextNode(categorias["Islas"][j]);
+                $(td).append(text);
+                $(tr).append(td);
+                for(s in categorias.Sexos){
+                    td = document.createElement("td");
+                    text = document.createTextNode(info[categorias["Años"][i]][j][s]);
+                    $(td).append(text);
+                    $(tr).append(td);
+                }
+                $(div).append(tr);
+            }
+            
+        }
+        $(table).append(div);
+    }
 }
