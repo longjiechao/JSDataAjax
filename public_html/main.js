@@ -1,11 +1,14 @@
 //https://datos.gob.es/es/catalogo/a05003423-suicidios-de-residentes-segun-sexos-islas-de-canarias-y-anos
+//https://analisis.datosabiertos.jcyl.es/api/records/1.0/search/?dataset=tasa-enfermos-acumulados-por-areas-de-salud&q=&sort=fecha&facet=fecha&facet=nombregerencia&facet=zbs_geo&facet=tipo_centro&facet=municipio
 
 window.onload = function(){
     consultaDades();
+    consultaMapa();
 };
 
 var categorias = {};
 var info = {};
+var infoMap = [];
 var titulo;
 
 function consultaDades() {
@@ -70,4 +73,24 @@ function setInfo(data){
     for(i = 0; i < data.length; i++){
         info[data[i].dimCodes[0]][data[i].dimCodes[1]][data[i].dimCodes[2]] = data[i].Valor;
     }
+}
+
+function consultaMapa(){
+    $.ajax({ url: "https://analisis.datosabiertos.jcyl.es/api/records/1.0/search/?dataset=tasa-enfermos-acumulados-por-areas-de-salud&q=&sort=fecha&facet=fecha&facet=nombregerencia&facet=zbs_geo&facet=tipo_centro&facet=municipio"})
+    .done(function (data) {
+        allFunctionsMap(data);
+    });
+}
+
+function allFunctionsMap(data){
+    setInfoMap(data.records);
+    setMap();
+}
+
+function setInfoMap(data){
+    for (i = 0; i < data.length; i++){
+        infoMap[i] = [data[i].fields.y_geo, data[i].fields.x_geo, (data[i].fields.provincia +": "+ data[i].fields.centro)];
+    }
+    console.log(infoMap);
+    console.log(data);
 }
